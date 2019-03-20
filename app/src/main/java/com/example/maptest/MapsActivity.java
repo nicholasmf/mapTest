@@ -1,7 +1,9 @@
 package com.example.maptest;
 
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -9,12 +11,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private FireStore db;
+    private TextView mName;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,10 +28,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        db = new FireStore();
+        mName = findViewById(R.id.name);
 
-        db.addPoints();
-        db.getAllPoints();
+        db = new FireStore();
+//        Building building = new Building("Carlão", new MyLatLng(42, 69), "Primordial", 1300);
+//        db.setDocument("buildings", "batata", building);
+//        db.getDocument("buildings", "batata");
     }
 
 
@@ -45,8 +51,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+//        LatLng sydney = new LatLng(-34, 151);
+//        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        new LoadData().execute();
+    }
+
+    private class LoadData extends AsyncTask<String, Integer, Long> implements DatabaseLoaded {
+        Building data;
+
+        @Override
+        protected Long doInBackground(String... strings) {
+            db.getDocument("buildings", "batata", this);
+            try {
+                while(data == null) {
+                    Thread.sleep(1000);
+                }
+            } catch (InterruptedException e) {
+                e.getStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Long aLong) {
+            super.onPostExecute(aLong);
+            mName.setText(data.getName());
+
+            mMap.addMarker(new MarkerOptions().position(data.getLocation().getLatLng()).title(data.getName()));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(data.getLocation().getLatLng()));
+        }
+
+        @Override
+        public void databaseLoaded(Building building) {
+            this.data = building;
+        }
     }
 }
