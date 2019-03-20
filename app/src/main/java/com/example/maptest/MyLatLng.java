@@ -11,17 +11,17 @@ public class MyLatLng {
         this.longitude = 0.0;
     }
 
-    public MyLatLng(Double latitutde, Double longitude) {
-        this.latitude = latitutde;
+    public MyLatLng(Double latitude, Double longitude) {
+        this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public Double getLatitutde() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitutde(Double latitutde) {
-        this.latitude = latitutde;
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
     }
 
     public Double getLongitude() {

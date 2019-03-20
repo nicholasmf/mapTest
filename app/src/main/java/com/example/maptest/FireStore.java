@@ -125,7 +125,7 @@ public class FireStore {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
                                 Building building = document.toObject(Building.class);
-                                Log.d(TAG, building.toString());
+                                Log.d(TAG, "document: " + document.getData());
                                 dbLoaded.databaseLoaded(building);
                             } else {
                                 Log.d(TAG, "get failed with ", task.getException());
