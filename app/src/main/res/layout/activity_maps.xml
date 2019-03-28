@@ -3,13 +3,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    tools:context=".MapsActivity">
 
     <TextView
         android:id="@+id/name"
-        android:text="Not loaded"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Not loaded" />
 
     <Switch
         android:id="@+id/switch1"
@@ -24,6 +26,5 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        tools:context=".MapsActivity" />
+        android:layout_weight="1" />
 </LinearLayout>

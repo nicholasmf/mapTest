@@ -4,4 +4,12 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="create_new">Create new</string>
+    <string name="default_info_title">Default title</string>
+    <string name="default_info_snippet">Default location</string>
+    <string name="pick_place">Pick a place</string>
+    <string name="title_activity_new_offer">NewOffer</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>
