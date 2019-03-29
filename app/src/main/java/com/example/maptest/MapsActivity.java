@@ -3,11 +3,15 @@ package com.example.maptest;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,11 +30,17 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import static android.support.constraint.Constraints.TAG;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -38,6 +48,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private FireStore db;
     private TextView mName;
+    private FloatingActionButton mNewButton;
 
     private CameraPosition mCameraPosition;
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -76,6 +87,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        Building building = new Building("Carlão", new MyLatLng(42, 69), "Primordial", 1300);
 //        db.setDocument("buildings", "batata", building);
 //        db.getDocument("buildings", "batata");
+
+        mNewButton = findViewById(R.id.newButton);
+        mNewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, SelectionMap.class);
+                mCameraPosition = mMap.getCameraPosition();
+                intent.putExtra("mLocationPermissionGranted", mLocationPermissionGranted);
+                intent.putExtra("mLastKnownLocation", mLastKnownLocation);
+                intent.putExtra("mCameraPosition", mCameraPosition);
+                startActivityForResult(intent, 1);
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == 100) {
+                getAllOffers();
+            }
+        }
     }
 
     @Override
@@ -151,7 +186,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         getDeviceLocation();
 
-        new LoadData().execute();
+        getAllOffers();
+    }
+
+    private void getAllOffers() {
+        db.getAllOffers().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        Building data = document.toObject(Building.class);
+                        mMap.addMarker(new MarkerOptions()
+                                .position(data.getLatLng())
+                                .title(data.getName()))
+                                .setSnippet("R$" + Float.toString(data.getPrice()));
+                    }
+                } else {
+                    Log.w(TAG, "Error getting documents.", task.getException());
+                }
+            }
+        });
     }
 
     private class LoadData extends AsyncTask<String, Integer, Long> implements DatabaseLoaded {
@@ -236,6 +290,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             mLastKnownLocation = (Location) task.getResult();
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+
+                            CircleOptions circleOptions = new CircleOptions()
+                                    .center(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()))
+                                    .fillColor(Color.argb(150, 30, 30,30))
+                                    .strokeColor(Color.argb(150, 30, 30,30))
+                                    .radius(1000);
+                            Circle circle = mMap.addCircle(circleOptions);
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception %s", task.getException());

@@ -14,5 +14,5 @@
         android:id="@+id/snippet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#f7f7f7"/>
+        android:textColor="#ff5555"/>
 </LinearLayout>

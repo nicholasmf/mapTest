@@ -22,6 +22,13 @@ public class Building {
         this.price = price;
     }
 
+    public Building(String name, LatLng location, String description, float price) {
+        this.name = name;
+        this.location = new MyLatLng(location.latitude, location.longitude);
+        this.description = description;
+        this.price = price;
+    }
+
     public String getName() {
         return name;
     }
@@ -32,6 +39,10 @@ public class Building {
 
     public MyLatLng getLocation() {
         return location;
+    }
+
+    public LatLng getLatLng() {
+        return location.getLatLng();
     }
 
     public void setLocation(MyLatLng location) {

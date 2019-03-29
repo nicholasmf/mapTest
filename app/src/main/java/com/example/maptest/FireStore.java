@@ -9,17 +9,21 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import static android.support.constraint.Constraints.TAG;
 
-public class FireStore {
+public class FireStore implements EventListener<QuerySnapshot> {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public void addPoints() {
@@ -78,6 +82,10 @@ public class FireStore {
                 .set(object);
     }
 
+    public void insertOffer(Object object) {
+        db.collection("offers").add(object);
+    }
+
     public void getDocument(String docName) {
         db.collection("positions").document(docName)
                 .get()
@@ -133,5 +141,19 @@ public class FireStore {
                         }
                     }
                 });
+    }
+
+    public Task<QuerySnapshot> getAllOffers() {
+        return db.collection("offers").get();
+    }
+
+    public void setOfferListener() {
+        db.collection("offers")
+                .addSnapshotListener(this);
+    }
+
+    @Override
+    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+
     }
 }
