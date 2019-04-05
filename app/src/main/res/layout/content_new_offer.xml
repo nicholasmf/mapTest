@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:hint="@string/offer_form_name"
+        android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -28,5 +29,40 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/offer_name" />
 
+    <RadioGroup
+        android:id="@+id/offer_type_group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checkedButton="@+id/offer_type_rent"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/offer_price">
+
+        <RadioButton
+            android:id="@+id/offer_type_rent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aluguel" />
+
+        <RadioButton
+            android:id="@+id/offer_type_sell"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Venda" />
+    </RadioGroup>
+
+    <ImageView
+        android:id="@+id/offer_image_preview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/offer_type_group" />
+    <Button
+        android:id="@+id/offer_image"
+        android:text="Upload image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/offer_image_preview"
+        app:layout_constraintStart_toStartOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

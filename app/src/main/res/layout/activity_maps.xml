@@ -48,7 +48,7 @@
         app:srcCompat="@android:drawable/ic_input_add" />
 
     <fragment
-        android:id="@+id/info_panel"
+        android:id="@+id/info_panel_fragment"
         android:name="com.example.maptest.info_panel"
         android:layout_width="match_parent"
         android:layout_height="160sp"
@@ -58,4 +58,34 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <android.support.v7.widget.CardView
+        android:background="@drawable/rounded_bg"
+        android:id="@+id/info_card"
+        android:layout_width="match_parent"
+        android:layout_height="160sp"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="vertical"
+        android:padding="16sp"
+        android:layout_marginStart="8sp"
+        android:layout_marginEnd="8sp"
+        android:layout_marginBottom="8sp"
+        app:cardElevation="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+        <TextView
+            android:id="@+id/info_card__title"
+            android:text="Test"
+            android:textColor="#ff0000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/info_card__price"
+            android:text="Preço"
+            android:textColor="#ff0000"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+    </android.support.v7.widget.CardView>
 </android.support.constraint.ConstraintLayout>

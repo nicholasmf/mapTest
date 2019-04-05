@@ -16,6 +16,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,6 +51,9 @@ public class MapsActivity extends AppCompatActivity
     private TextView mName;
     private FloatingActionButton mNewButton;
     private info_panel mInfoPanel;
+    private CardView mInfoCard;
+    private TextView mInfoCardTitle;
+    private TextView mInfoCardPrice;
 
     private InfoViewModel mInfoViewModel;
 
@@ -84,10 +88,13 @@ public class MapsActivity extends AppCompatActivity
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         mName = findViewById(R.id.name);
-        mInfoPanel = (info_panel) getSupportFragmentManager().findFragmentById(R.id.info_panel);
+        mInfoPanel = (info_panel) getSupportFragmentManager().findFragmentById(R.id.info_panel_fragment);
         getSupportFragmentManager().beginTransaction()
                 .hide(mInfoPanel)
                 .commit();
+        mInfoCard = findViewById(R.id.info_card);
+        mInfoCardTitle = findViewById(R.id.info_card__title);
+        mInfoCardPrice = findViewById(R.id.info_card__price);
 
         db = new FireStore();
         mInfoViewModel = ViewModelProviders.of(this).get(InfoViewModel.class);
@@ -199,19 +206,25 @@ public class MapsActivity extends AppCompatActivity
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                getSupportFragmentManager().beginTransaction()
-                        .hide(mInfoPanel)
-                        .commit();
+//                getSupportFragmentManager().beginTransaction()
+//                        .hide(mInfoPanel)
+//                        .commit();
+
+                mInfoCard.setVisibility(View.GONE);
             }
         });
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                mInfoViewModel.getSelectedMarker().setValue(marker);
-                getSupportFragmentManager().beginTransaction()
-                        .show(mInfoPanel)
-                        .commit();
+//                mInfoViewModel.getSelectedMarker().setValue(marker);
+//                getSupportFragmentManager().beginTransaction()
+//                        .show(mInfoPanel)
+//                        .commit();
+
+                mInfoCardTitle.setText(marker.getTitle());
+                mInfoCardPrice.setText(marker.getSnippet());
+                mInfoCard.setVisibility(View.VISIBLE);
 
                 return true;
             }
