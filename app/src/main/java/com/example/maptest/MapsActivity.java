@@ -1,17 +1,18 @@
 package com.example.maptest;
 
 import android.Manifest;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,7 +22,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -40,15 +40,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import static android.support.constraint.Constraints.TAG;
-
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity
+        implements OnMapReadyCallback,
+                    info_panel.OnFragmentInteractionListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     private FireStore db;
     private TextView mName;
     private FloatingActionButton mNewButton;
+    private info_panel mInfoPanel;
+
+    private InfoViewModel mInfoViewModel;
 
     private CameraPosition mCameraPosition;
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -81,8 +84,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         mName = findViewById(R.id.name);
+        mInfoPanel = (info_panel) getSupportFragmentManager().findFragmentById(R.id.info_panel);
+        getSupportFragmentManager().beginTransaction()
+                .hide(mInfoPanel)
+                .commit();
 
         db = new FireStore();
+        mInfoViewModel = ViewModelProviders.of(this).get(InfoViewModel.class);
 
 //        Building building = new Building("Carlão", new MyLatLng(42, 69), "Primordial", 1300);
 //        db.setDocument("buildings", "batata", building);
@@ -133,11 +141,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         int selectedItem = item.getItemId();
         if (selectedItem == R.id.create) {
-            Toast.makeText(MapsActivity.this, "Create new", Toast.LENGTH_LONG).show();
-            Intent intent = new Intent(MapsActivity.this, NewOffer.class);
-            startActivity(intent);
+            Intent intent = new Intent(MapsActivity.this, SelectionMap.class);
+            mCameraPosition = mMap.getCameraPosition();
+            intent.putExtra("mLocationPermissionGranted", mLocationPermissionGranted);
+            intent.putExtra("mLastKnownLocation", mLastKnownLocation);
+            intent.putExtra("mCameraPosition", mCameraPosition);
+            startActivityForResult(intent, 1);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        Log.d("panel click", "clicked");
     }
 
     /**
@@ -180,6 +196,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                getSupportFragmentManager().beginTransaction()
+                        .hide(mInfoPanel)
+                        .commit();
+            }
+        });
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                mInfoViewModel.getSelectedMarker().setValue(marker);
+                getSupportFragmentManager().beginTransaction()
+                        .show(mInfoPanel)
+                        .commit();
+
+                return true;
+            }
+        });
+
         getLocationPermission();
 
         updateLocationUI();
@@ -187,6 +224,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         getDeviceLocation();
 
         getAllOffers();
+    }
+
+    public void onPanelClick(View v) {
+        Log.d("info panel", "clicked");
     }
 
     private void getAllOffers() {
