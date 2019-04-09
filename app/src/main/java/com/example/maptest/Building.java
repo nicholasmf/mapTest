@@ -1,12 +1,18 @@
 package com.example.maptest;
 
+import android.net.Uri;
+
 import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
 
 public class Building {
     private String name;
     private MyLatLng location;
     private String description;
     private float price;
+    private String type;
+    private ArrayList<String> images;
 
     public Building() {
         this.name = "";
@@ -22,11 +28,12 @@ public class Building {
         this.price = price;
     }
 
-    public Building(String name, LatLng location, String description, float price) {
+    public Building(String name, LatLng location, String description, float price, String type, ArrayList images) {
         this.name = name;
-        this.location = new MyLatLng(location.latitude, location.longitude);
         this.description = description;
         this.price = price;
+        this.type = type;
+        this.images = images;
     }
 
     public String getName() {
@@ -63,5 +70,21 @@ public class Building {
 
     public void setPrice(float price) {
         this.price = price;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public ArrayList<String> getImages() {
+        return images;
+    }
+
+    public void setImages(ArrayList<String> images) {
+        this.images = images;
     }
 }

@@ -4,6 +4,8 @@ import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
@@ -12,16 +14,22 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.card.MaterialCardView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -41,17 +49,24 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+
 public class MapsActivity extends AppCompatActivity
         implements OnMapReadyCallback,
                     info_panel.OnFragmentInteractionListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
+    private ConstraintLayout mMainLayout;
     private GoogleMap mMap;
     private FireStore db;
     private TextView mName;
     private FloatingActionButton mNewButton;
     private info_panel mInfoPanel;
-    private CardView mInfoCard;
+    private MaterialCardView mInfoCard;
     private TextView mInfoCardTitle;
     private TextView mInfoCardPrice;
 
@@ -66,6 +81,13 @@ public class MapsActivity extends AppCompatActivity
     private boolean mLocationPermissionGranted;
 
     private Location mLastKnownLocation;
+    private Building selectedBuilding;
+    private HashMap<String, Building> loadedBuildings = new HashMap<>();
+    private ArrayList viewImages = new ArrayList();
+
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
@@ -87,6 +109,7 @@ public class MapsActivity extends AppCompatActivity
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
+        mMainLayout = findViewById(R.id.main_layout);
         mName = findViewById(R.id.name);
         mInfoPanel = (info_panel) getSupportFragmentManager().findFragmentById(R.id.info_panel_fragment);
         getSupportFragmentManager().beginTransaction()
@@ -99,9 +122,12 @@ public class MapsActivity extends AppCompatActivity
         db = new FireStore();
         mInfoViewModel = ViewModelProviders.of(this).get(InfoViewModel.class);
 
-//        Building building = new Building("Carlão", new MyLatLng(42, 69), "Primordial", 1300);
-//        db.setDocument("buildings", "batata", building);
-//        db.getDocument("buildings", "batata");
+        mRecyclerView = findViewById(R.id.info_card__image_container);
+        layoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(layoutManager);
+
+        mAdapter = new MyAdapter(viewImages);
+        mRecyclerView.setAdapter(mAdapter);
 
         mNewButton = findViewById(R.id.newButton);
         mNewButton.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +141,17 @@ public class MapsActivity extends AppCompatActivity
                 startActivityForResult(intent, 1);
             }
         });
+
+        mInfoCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewGroup.LayoutParams layoutParams = mInfoCard.getLayoutParams();
+                layoutParams.height = -1;
+                layoutParams.width = -1;
+                mInfoCard.setLayoutParams(layoutParams);
+            }
+        });
+
     }
 
     @Override
@@ -221,9 +258,18 @@ public class MapsActivity extends AppCompatActivity
 //                getSupportFragmentManager().beginTransaction()
 //                        .show(mInfoPanel)
 //                        .commit();
+                ImageView imageView = findViewById(R.id.info_card__image);
 
+                selectedBuilding = loadedBuildings.get(marker.getSnippet());
+                if (selectedBuilding.getImages() != null && selectedBuilding.getImages().size() > 0) {
+                    viewImages.addAll(selectedBuilding.getImages());
+                    Log.d("new images", String.format("%d", mAdapter.getItemCount()));
+                    setPic(imageView, selectedBuilding.getImages().get(0));
+                }
+                viewImages.clear();
+                mAdapter.notifyDataSetChanged();
                 mInfoCardTitle.setText(marker.getTitle());
-                mInfoCardPrice.setText(marker.getSnippet());
+                mInfoCardPrice.setText(String.format(Locale.UK, "R$ %.2f", selectedBuilding.getPrice()));
                 mInfoCard.setVisibility(View.VISIBLE);
 
                 return true;
@@ -250,10 +296,11 @@ public class MapsActivity extends AppCompatActivity
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Building data = document.toObject(Building.class);
+                        loadedBuildings.put(document.getId(), data);
                         mMap.addMarker(new MarkerOptions()
                                 .position(data.getLatLng())
-                                .title(data.getName()))
-                                .setSnippet("R$" + Float.toString(data.getPrice()));
+                                .title(data.getName())
+                                .snippet(document.getId()));
                     }
                 } else {
                     Log.w(TAG, "Error getting documents.", task.getException());
@@ -283,7 +330,7 @@ public class MapsActivity extends AppCompatActivity
             super.onPostExecute(aLong);
             mName.setText(data.getName());
 
-            mMap.addMarker(new MarkerOptions().position(data.getLocation().getLatLng()).title(data.getName()));
+            mMap.addMarker(new MarkerOptions().position(data.getLatLng()).title(data.getName()));
         }
 
         @Override
@@ -362,6 +409,34 @@ public class MapsActivity extends AppCompatActivity
             }
         } catch(SecurityException e){
             Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    private void setPic(ImageView mImageView, String filePath) {
+//        int targetW = Math.max(mImageView.getWidth(), 80);
+//        int targetH = Math.max(mImageView.getHeight(), 80);
+//
+//        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+//        bmOptions.inJustDecodeBounds = true;
+//        BitmapFactory.decodeFile(filePath, bmOptions);
+//
+//        int photoW = bmOptions.outWidth;
+//        int photoH = bmOptions.outHeight;
+//
+//        int scaleFactor = Math.min(photoW/targetW, photoH/ targetH);
+//        scaleFactor = Math.min(scaleFactor, 80);
+//
+//        bmOptions.inJustDecodeBounds = false;
+//        bmOptions.inSampleSize = scaleFactor;
+//        bmOptions.inPurgeable = true;
+
+        try {
+            URL url = new URL(filePath);
+            Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+            mImageView.setImageBitmap(bmp);
+        } catch (Exception e) {
+            Log.e("error on file stream", "Error on " + e.getMessage());
+            e.getStackTrace();
         }
     }
 }

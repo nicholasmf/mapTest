@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_layout"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -57,35 +58,59 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout="@layout/fragment_info_panel" />
 
-    <android.support.v7.widget.CardView
-        android:background="@drawable/rounded_bg"
+    <android.support.design.card.MaterialCardView
         android:id="@+id/info_card"
+        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="160sp"
+        android:layout_height="wrap_content"
+        android:minHeight="240sp"
         android:clickable="true"
         android:focusable="true"
         android:orientation="vertical"
-        android:padding="16sp"
         android:layout_marginStart="8sp"
         android:layout_marginEnd="8sp"
         android:layout_marginBottom="8sp"
+        app:contentPadding="12sp"
+        app:cardCornerRadius="5sp"
         app:cardElevation="12sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
-        <TextView
-            android:id="@+id/info_card__title"
-            android:text="Test"
-            android:textColor="#ff0000"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/info_card__image_container"
+            android:scrollbars="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:minHeight="80sp">
 
-        <TextView
-            android:id="@+id/info_card__price"
-            android:text="Preço"
-            android:textColor="#ff0000"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
-    </android.support.v7.widget.CardView>
+        </android.support.v7.widget.RecyclerView>
+        <LinearLayout
+            android:orientation="vertical"
+            android:minHeight="160sp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/info_card__image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/info_card__title"
+                android:text="Test"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#ff0000"
+                android:layout_marginBottom="8sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/info_card__price"
+                android:text="Preço"
+                android:textColor="#ff0000"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </android.support.design.card.MaterialCardView>
 </android.support.constraint.ConstraintLayout>
