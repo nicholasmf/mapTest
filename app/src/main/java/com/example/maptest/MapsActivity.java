@@ -49,6 +49,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -264,7 +265,7 @@ public class MapsActivity extends AppCompatActivity
                 if (selectedBuilding.getImages() != null && selectedBuilding.getImages().size() > 0) {
                     viewImages.addAll(selectedBuilding.getImages());
                     Log.d("new images", String.format("%d", mAdapter.getItemCount()));
-                    setPic(imageView, selectedBuilding.getImages().get(0));
+//                    setPic(imageView, selectedBuilding.getImages().get(0));
                 }
                 viewImages.clear();
                 mAdapter.notifyDataSetChanged();
@@ -430,13 +431,39 @@ public class MapsActivity extends AppCompatActivity
 //        bmOptions.inSampleSize = scaleFactor;
 //        bmOptions.inPurgeable = true;
 
-        try {
-            URL url = new URL(filePath);
-            Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-            mImageView.setImageBitmap(bmp);
-        } catch (Exception e) {
-            Log.e("error on file stream", "Error on " + e.getMessage());
-            e.getStackTrace();
+//        try {
+//            URL url = new URL("https://unsplash.it/300/300");
+//            Bitmap bmp = BitmapFactory.decodeStream(url.openStream());
+//            mImageView.setImageBitmap(bmp);
+//        } catch (Exception e) {
+//            Log.e("error on file stream", "Error on " + e.getMessage());
+//            e.getStackTrace();
+//        }
+
+        AsyncTask downloadImageTask = new DownloadImageTask(mImageView).execute(filePath);
+    }
+
+
+    private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+        public DownloadImageTask(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap bmp = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                bmp = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return bmp;
+        }
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
         }
     }
 }
