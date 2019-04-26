@@ -30,6 +30,7 @@ public class Building {
 
     public Building(String name, LatLng location, String description, float price, String type, ArrayList images) {
         this.name = name;
+        this.location = new MyLatLng(location.latitude, location.longitude);
         this.description = description;
         this.price = price;
         this.type = type;
@@ -48,9 +49,7 @@ public class Building {
         return location;
     }
 
-    public LatLng getLatLng() {
-        return location.getLatLng();
-    }
+    public LatLng getLatLng() { return location.getLatLng(); }
 
     public void setLocation(MyLatLng location) {
         this.location = location;

@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android" />
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <ImageView
+        android:id="@+id/iv_view_holder__img"
+        android:layout_width="160sp"
+        android:layout_height="80sp"
+        android:scaleType="centerCrop"/>
+</FrameLayout>

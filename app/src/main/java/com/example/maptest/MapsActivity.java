@@ -2,16 +2,21 @@ package com.example.maptest;
 
 import android.Manifest;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
@@ -38,6 +43,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -87,7 +94,7 @@ public class MapsActivity extends AppCompatActivity
     private ArrayList viewImages = new ArrayList();
 
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private MyAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
     private static final String KEY_CAMERA_POSITION = "camera_position";
@@ -124,7 +131,7 @@ public class MapsActivity extends AppCompatActivity
         mInfoViewModel = ViewModelProviders.of(this).get(InfoViewModel.class);
 
         mRecyclerView = findViewById(R.id.info_card__image_container);
-        layoutManager = new LinearLayoutManager(this);
+        layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
 
         mAdapter = new MyAdapter(viewImages);
@@ -147,8 +154,11 @@ public class MapsActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 ViewGroup.LayoutParams layoutParams = mInfoCard.getLayoutParams();
-                layoutParams.height = -1;
-                layoutParams.width = -1;
+                if (layoutParams.height == -1) {
+                    layoutParams.height = (int) Math.round(160.0 * MapsActivity.this.getResources().getDisplayMetrics().scaledDensity);
+                } else {
+                    layoutParams.height = -1;
+                }
                 mInfoCard.setLayoutParams(layoutParams);
             }
         });
@@ -263,12 +273,13 @@ public class MapsActivity extends AppCompatActivity
 
                 selectedBuilding = loadedBuildings.get(marker.getSnippet());
                 if (selectedBuilding.getImages() != null && selectedBuilding.getImages().size() > 0) {
-                    viewImages.addAll(selectedBuilding.getImages());
+                    mAdapter.updateList(selectedBuilding.getImages());
                     Log.d("new images", String.format("%d", mAdapter.getItemCount()));
 //                    setPic(imageView, selectedBuilding.getImages().get(0));
+                } else {
+                    mAdapter.clearList();
+                    Log.d("new images", "no images for " + selectedBuilding.getName());
                 }
-                viewImages.clear();
-                mAdapter.notifyDataSetChanged();
                 mInfoCardTitle.setText(marker.getTitle());
                 mInfoCardPrice.setText(String.format(Locale.UK, "R$ %.2f", selectedBuilding.getPrice()));
                 mInfoCard.setVisibility(View.VISIBLE);
@@ -298,10 +309,20 @@ public class MapsActivity extends AppCompatActivity
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         Building data = document.toObject(Building.class);
                         loadedBuildings.put(document.getId(), data);
-                        mMap.addMarker(new MarkerOptions()
+                        MarkerOptions markerOptions = new MarkerOptions()
                                 .position(data.getLatLng())
                                 .title(data.getName())
-                                .snippet(document.getId()));
+                                .snippet(document.getId());
+
+                        if (data.getType().equals("rent")) {
+                            markerOptions.icon(bitmapDescriptorFromVector(MapsActivity.this, R.drawable.ic_location_city_black_24dp));
+                        } else if (data.getType().equals("sell")) {
+                            markerOptions.icon(bitmapDescriptorFromVector(MapsActivity.this, R.drawable.ic_local_offer_black_24dp));
+                        } else {
+                            Log.d("marker", "No valid type " + data.getType());
+                        }
+
+                        mMap.addMarker(markerOptions);
                     }
                 } else {
                     Log.w(TAG, "Error getting documents.", task.getException());
@@ -465,5 +486,17 @@ public class MapsActivity extends AppCompatActivity
         protected void onPostExecute(Bitmap result) {
             bmImage.setImageBitmap(result);
         }
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
+        Drawable background = ContextCompat.getDrawable(context, R.drawable.ic_room_black_24dp);
+        background.setBounds(0, 0, background.getIntrinsicWidth(), background.getIntrinsicHeight());
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId);
+        vectorDrawable.setBounds(40, 20, vectorDrawable.getIntrinsicWidth() + 40, vectorDrawable.getIntrinsicHeight() + 20);
+        Bitmap bitmap = Bitmap.createBitmap(background.getIntrinsicWidth(), background.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        background.draw(canvas);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 }
