@@ -105,21 +105,13 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         }
     }
 
-    class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView imgView;
 
         public MyViewHolder(View itemView) {
             super(itemView);
 
             imgView = (ImageView) itemView.findViewById(R.id.iv_view_holder__img);
-
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            int clickPosition = getAdapterPosition();
-
         }
     }
 }

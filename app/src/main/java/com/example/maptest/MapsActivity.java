@@ -48,6 +48,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -71,8 +72,6 @@ public class MapsActivity extends AppCompatActivity
     private ConstraintLayout mMainLayout;
     private GoogleMap mMap;
     private FireStore db;
-    private TextView mName;
-    private FloatingActionButton mNewButton;
     private info_panel mInfoPanel;
     private MaterialCardView mInfoCard;
     private TextView mInfoCardTitle;
@@ -118,7 +117,6 @@ public class MapsActivity extends AppCompatActivity
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         mMainLayout = findViewById(R.id.main_layout);
-        mName = findViewById(R.id.name);
         mInfoPanel = (info_panel) getSupportFragmentManager().findFragmentById(R.id.info_panel_fragment);
         getSupportFragmentManager().beginTransaction()
                 .hide(mInfoPanel)
@@ -136,19 +134,6 @@ public class MapsActivity extends AppCompatActivity
 
         mAdapter = new MyAdapter(viewImages);
         mRecyclerView.setAdapter(mAdapter);
-
-        mNewButton = findViewById(R.id.newButton);
-        mNewButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapsActivity.this, SelectionMap.class);
-                mCameraPosition = mMap.getCameraPosition();
-                intent.putExtra("mLocationPermissionGranted", mLocationPermissionGranted);
-                intent.putExtra("mLastKnownLocation", mLastKnownLocation);
-                intent.putExtra("mCameraPosition", mCameraPosition);
-                startActivityForResult(intent, 1);
-            }
-        });
 
         mInfoCard.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,7 +208,12 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+        LatLng newMark = new LatLng(-23.304090, -51.184599);
+        GroundOverlayOptions newarkMap = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.casaba))
+                .position(newMark, 86f, 65f);
+        mMap.addGroundOverlay(newarkMap);
+//        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
         // Add a marker in Sydney and move the camera
 //        LatLng sydney = new LatLng(-34, 151);
@@ -269,7 +259,7 @@ public class MapsActivity extends AppCompatActivity
 //                getSupportFragmentManager().beginTransaction()
 //                        .show(mInfoPanel)
 //                        .commit();
-                ImageView imageView = findViewById(R.id.info_card__image);
+//                ImageView imageView = findViewById(R.id.info_card__image);
 
                 selectedBuilding = loadedBuildings.get(marker.getSnippet());
                 if (selectedBuilding.getImages() != null && selectedBuilding.getImages().size() > 0) {
@@ -350,7 +340,6 @@ public class MapsActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(Long aLong) {
             super.onPostExecute(aLong);
-            mName.setText(data.getName());
 
             mMap.addMarker(new MarkerOptions().position(data.getLatLng()).title(data.getName()));
         }

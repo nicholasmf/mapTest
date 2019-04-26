@@ -8,21 +8,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MapsActivity">
 
-    <TextView
-        android:id="@+id/name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/not_loaded"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Switch
-        android:id="@+id/switch1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/switch1"
-        app:layout_constraintTop_toBottomOf="@+id/name"
-        tools:layout_editor_absoluteX="16dp" />
-
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:map="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
@@ -33,20 +18,8 @@
         map:layout_constraintBottom_toBottomOf="parent"
         map:layout_constraintEnd_toEndOf="parent"
         map:layout_constraintStart_toStartOf="parent"
-        map:layout_constraintTop_toBottomOf="@+id/switch1" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/newButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        map:layout_constraintTop_toTopOf="parent"
+        map:mapType="normal" />
 
     <fragment
         android:id="@+id/info_panel_fragment"
@@ -72,7 +45,6 @@
         android:layout_marginStart="8sp"
         android:layout_marginEnd="8sp"
         android:layout_marginBottom="8sp"
-        app:contentPadding="12sp"
         app:cardCornerRadius="5sp"
         app:cardElevation="12sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -88,33 +60,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <ImageView
-                android:id="@+id/info_card__image"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
             <TextView
                 android:id="@+id/info_card__title"
-                android:text="Test"
-                android:textSize="20sp"
+                android:textSize="26sp"
                 android:textStyle="bold"
-                android:textColor="#ff0000"
-                android:layout_marginBottom="8sp"
+                android:textColor="#393E41"
+                android:layout_marginLeft="8sp"
+                android:layout_marginRight="8sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
             <TextView
                 android:id="@+id/info_card__price"
-                android:text="Preço"
-                android:textColor="#ff0000"
+                android:layout_marginLeft="8sp"
+                android:layout_marginRight="8sp"
+                android:textColor="#696E71"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent" />
 
-            <TextView
-                android:id="@+id/info_card__url"
-                android:text="Link"
-                android:textColor="#ff0000"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" />
         </LinearLayout>
     </android.support.design.card.MaterialCardView>
 </android.support.constraint.ConstraintLayout>
